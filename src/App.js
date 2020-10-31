@@ -1,26 +1,50 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
+import api from './services/api';
 
 import "./styles.css";
 
 function App() {
+const [repositories, setRepositories] = useState([]);
+
+  useEffect(() => {
+    api.get('repositories').then(response => {
+      setRepositories(response.data);
+    })
+  }, []);
+
+
   async function handleAddRepository() {
-    // TODO
+    const response = await api.post('repositories', {
+      title: 'Bankai',
+      url: 'https://github.com/memer95/Bankai',
+      techs: ['NodeJs', 'React']
+    });
+
+    const rep = response.data;
+
+    setRepositories( ...repositories, [rep]);
   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+    await api.delete(`repositories/${id}`)
+
+    setRepositories(repositories.filter(
+      rep => rep.id != id
+    ))
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        <li>
-          Repositório 1
+        {repositories.map(rep => (
+            <li key ={rep.id}>
+              {rep.title}
 
-          <button onClick={() => handleRemoveRepository(1)}>
-            Remover
-          </button>
-        </li>
+              <button onClick={() => handleRemoveRepository(rep.id)}>
+                   Remover
+              </button>
+            </li>
+        ))}
       </ul>
 
       <button onClick={handleAddRepository}>Adicionar</button>
